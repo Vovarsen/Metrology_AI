@@ -13,7 +13,7 @@ DISPLAY_WINDOW_WIDTH = 1024
  
 cap = cv2.VideoCapture(VIDEO_PATH)
 if not cap.isOpened():
-    print('ошибка открытия файла')
+    print('ошибка открытия')
  
 
 ret,frame = cap.read() 
@@ -23,7 +23,7 @@ frame_h, frame_w = frame.shape[:2]
 try:
     track_window = YOLO_detector.f(MODEL_NAME, frame)
 except Exception as e:
-    print("Ошибка при вызове f")
+    print("Ошибка при  f")
     track_window = None
 
 if track_window is None:
@@ -144,11 +144,10 @@ while True:
         break
 
 #csv_file.close()
-#print(f"Статистика сохранена в файл: {STATS_FILENAME}")
 
 
 video_writer.release()
-print('сохранено в файл')
+print('сохранено')
 
 cap.release()
 cv2.destroyAllWindows()
