@@ -3,17 +3,17 @@ import cv2
 import YOLO_detector
 import csv 
 
-MODEL_NAME = 'best.pt'
-VIDEO_PATH = "C:/Users/arsen/Downloads/100см.mp4"
+MODEL_NAME = 'best2.pt'
+VIDEO_PATH = "C:/Users/arsen/Videos/video_2025-10-24_18-13-16.mp4"
 IMAGE_NAME = 'frame_for_yolo.jpg'
-OUTPUT_VIDEO_PATH = 'tracked_video_kalman2.mp4'
-#STATS_FILENAME = 'tracking_log_kalman2.csv'
+OUTPUT_VIDEO_PATH = 'tracked_video_kalman.mp4'
+STATS_FILENAME = 'tracking_log_kalman.csv'
 
 DISPLAY_WINDOW_WIDTH = 1024 
  
 cap = cv2.VideoCapture(VIDEO_PATH)
 if not cap.isOpened():
-    print('ошибка открытия')
+    print('ошибка открытия файла')
  
 
 ret,frame = cap.read() 
@@ -23,7 +23,7 @@ frame_h, frame_w = frame.shape[:2]
 try:
     track_window = YOLO_detector.f(MODEL_NAME, frame)
 except Exception as e:
-    print("Ошибка при  f")
+    print("Ошибка при вызове f")
     track_window = None
 
 if track_window is None:
@@ -38,7 +38,7 @@ if w<=0 or h <= 0:
 
 
 
-shrink_factor = 0.7
+shrink_factor = 0.8
 new_w = int(w * shrink_factor)
 new_h = int(h * shrink_factor)
 
@@ -92,9 +92,9 @@ original_size = (frame_w, frame_h)
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 video_writer = cv2.VideoWriter(OUTPUT_VIDEO_PATH, fourcc, fps, original_size)
 
-#csv_file = open(STATS_FILENAME, 'w', newline='')
-#csv_writer = csv.writer(csv_file)
-#csv_writer.writerow(['x', 'y', 'width', 'height'])
+csv_file = open(STATS_FILENAME, 'w', newline='')
+csv_writer = csv.writer(csv_file)
+csv_writer.writerow(['x', 'y', 'width', 'height'])
 
 
 
@@ -120,11 +120,11 @@ while True:
         measurement = np.array([[x_t + w_t /2], [y_t + h_t/2]], np.float32)
         corrt = kalman.correct(measurement)
 
-        kalman_x, kalman_y = int(corrt[0]), int(corrt[1])
+        kalman_x, kalman_y = int(corrt[0], int(corrt[1]))
         log_x = kalman_x - w_t//2
         log_y = kalman_y - h_t//2
 
-        #csv_writer.writerow([ log_x,log_y, w_t, h_t])
+        csv_writer.writerow([ log_x,log_y, w_t, h_t])
         
 
         img2 = cv2.rectangle(frame, (log_x,log_y), (log_x+w_t,log_y+h_t), (0,255,0), 3)
@@ -143,11 +143,12 @@ while True:
     else:
         break
 
-#csv_file.close()
+csv_file.close()
+print(f"Статистика сохранена в файл: {STATS_FILENAME}")
 
 
 video_writer.release()
-print('сохранено')
+print('сохранено в файл')
 
 cap.release()
 cv2.destroyAllWindows()
